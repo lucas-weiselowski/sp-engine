@@ -1,5 +1,9 @@
 # sp-engine
 
+![Docker Pulls](https://img.shields.io/docker/pulls/karlender/sp-engine)
+![Docker Image Size](https://img.shields.io/docker/image-size/karlender/sp-engine/latest)
+![GitHub](https://img.shields.io/github/license/lucas-weiselowski/sp-engine)
+
 A batteries-included Python environment for Service Provider network automation.
 Built for engineers working with IOS-XR, JunOS, NX-OS and everything in between.
 
@@ -108,3 +112,4 @@ tested manually.
 
 Built with ❤️ for SP engineers tired of setting up Python environments. \
 Source: [github.com/lucas-weiselowski/sp-engine](https://github.com/lucas-weiselowski/sp-engine)
+Docker Hub: [karlender/sp-engine](https://hub.docker.com/r/karlender/sp-engine)
