@@ -1,10 +1,11 @@
-# .github/workflows/build.yml
 name: Build & Push
 
 on:
   push:
     branches:
     - main
+    tags:
+    - "v*"
   schedule:
   - cron: '0 3 * * 1'
   workflow_dispatch:
@@ -13,7 +14,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -27,6 +27,39 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Docker Metadata final
+      id: meta-final
+      uses: docker/metadata-action@v5
+      with:
+        images: karlender/sp-engine
+        tags: |
+          type=raw,value=latest
+          type=raw,value=latest-final
+          type=semver,pattern={{ version }}-final
+          type=semver,pattern={{ major }}.{{ minor }}-final
+
+    - name: Docker Metadata slim
+      id: meta-slim
+      uses: docker/metadata-action@v5
+      with:
+        images: karlender/sp-engine
+        tags: |
+          type=raw,value=latest-slim
+          type=raw,value=slim
+          type=semver,pattern={{ version }}-slim
+          type=semver,pattern={{ major }}.{{ minor }}-slim
+
+    - name: Docker Metadata dev
+      id: meta-dev
+      uses: docker/metadata-action@v5
+      with:
+        images: karlender/sp-engine
+        tags: |
+          type=raw,value=latest-dev
+          type=raw,value=dev
+          type=semver,pattern={{ version }}-dev
+          type=semver,pattern={{ major }}.{{ minor }}-dev
+
     - name: Build & Push final
       uses: docker/build-push-action@v5
       with:
@@ -35,10 +68,7 @@ jobs:
         target: final
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: |
-          karlender/sp-engine:latest
-          karlender/sp-engine:latest-final
-          karlender/sp-engine:1.0.0-final
+        tags: ${{ steps.meta-final.outputs.tags }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -50,10 +80,7 @@ jobs:
         target: slim
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: |
-          karlender/sp-engine:slim
-          karlender/sp-engine:latest-slim
-          karlender/sp-engine:1.0.0-slim
+        tags: ${{ steps.meta-slim.outputs.tags }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -65,9 +92,6 @@ jobs:
         target: dev
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: |
-          karlender/sp-engine:dev
-          karlender/sp-engine:latest-dev
-          karlender/sp-engine:1.0.0-dev
+        tags: ${{ steps.meta-dev.outputs.tags }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
