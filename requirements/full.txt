@@ -1,0 +1,5 @@
+# Production / final image
+-r base.txt
+-r netconf.txt
+-r restconf.txt
+-r ai.txt

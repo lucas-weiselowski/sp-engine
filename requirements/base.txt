@@ -1,0 +1,65 @@
+# ── Environment / Config ──────────────────────────────────
+dotenv>=0.9.9
+pydantic>=2.7
+pydantic-settings>=2.3
+PyYAML>=6.0
+toml>=0.10
+
+# ── CLI / Output ──────────────────────────────────────────
+click>=8.1
+rich>=13.7
+loguru>=0.7
+tabulate>=0.9
+tqdm>=4.66
+
+# ── HTTP / Requests ───────────────────────────────────────
+requests>=2.31
+urllib3>=2.2
+httpx>=0.27
+certifi>=2024.0             # CA Certificates
+charset-normalizer>=3.3
+
+# ── Templating ────────────────────────────────────────────
+Jinja2>=3.1
+MarkupSafe>=2.1
+
+# ── Datum / Zeit ──────────────────────────────────────────
+python-dateutil>=2.9
+pytz>=2024.1
+
+# ── Daten / Serialisierung ────────────────────────────────
+xmltodict>=0.13
+lxml>=5.2
+orjson>=3.10
+ujson>=5.10
+
+# ── Kryptographie / Auth ──────────────────────────────────
+passlib>=1.7                # ansible password_hash
+bcrypt>=4.1                 # passlib Backend
+
+# ── SSH / Multi-Vendor ────────────────────────────────────
+netmiko>=4.3
+napalm>=5.0
+paramiko>=3.4
+scp>=0.15                   # SCP via paramiko
+
+# ── IP / Netzwerk Utilities ───────────────────────────────
+netaddr>=1.3                # ansible ipaddr / ipsubnet Filter
+netutils>=1.9
+
+# ── Ansible Core  ─────────────────────────────────────────
+ansible-core>=2.17
+ansible-runner>=2.4
+jmespath>=1.0
+resolvelib>=1.0
+
+# ── Ansible Collection Deps ───────────────────────────────
+nornir>=3.4
+nornir-netmiko>=1.0
+nornir-napalm>=0.1.2
+
+# ── Hashing / Utils ───────────────────────────────────────
+packaging>=24.0
+six>=1.16                   # Legacy
+setuptools>=70.0
+wheel>=0.43

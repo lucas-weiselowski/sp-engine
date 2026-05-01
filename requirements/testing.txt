@@ -1,0 +1,16 @@
+# Standalone – kein -r hier
+# CI: final image + pip install -r requirements/testing.txt
+
+# ── Test Framework ────────────────────────────────────────
+pytest>=8.2
+pytest-cov>=5.0
+pytest-mock>=3.14
+pytest-asyncio>=0.23
+
+# ── HTTP Mocking ──────────────────────────────────────────
+responses>=0.25
+respx>=0.21
+
+# ── Netzwerk Mocking ──────────────────────────────────────
+nornir>=3.4
+nornir-netmiko>=1.0

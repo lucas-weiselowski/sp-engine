@@ -1,0 +1,30 @@
+---
+collections:
+
+  # ── Cisco IOS ─────────────────────────────────────────────
+  - name: cisco.ios
+    version: ">=6.0"
+
+  # ── Cisco IOS-XR ──────────────────────────────────────────
+  - name: cisco.iosxr
+    version: ">=9.0"
+
+  # ── Cisco NX-OS ───────────────────────────────────────────
+  - name: cisco.nxos
+    version: ">=8.0"
+
+  # ── Juniper JunOS ─────────────────────────────────────────
+  - name: junipernetworks.junos
+    version: ">=6.0"
+
+  # ── Netcommon ─────────────────────────────────────────────
+  - name: ansible.netcommon
+    version: ">=6.1"
+
+  # ── Utils ─────────────────────────────────────────────────
+  - name: ansible.utils
+    version: ">=4.0"
+
+  # ── Community Network ─────────────────────────────────────
+  - name: community.network
+    version: ">=5.0"
