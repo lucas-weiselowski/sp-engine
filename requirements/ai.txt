@@ -3,6 +3,7 @@ ollama>=0.2
 
 # ── LangChain ─────────────────────────────────────────────
 langchain>=0.2
+langchain-core>=0.3.81
 langchain-community>=0.2
 langchain-ollama>=0.1
 

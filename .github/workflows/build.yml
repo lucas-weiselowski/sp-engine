@@ -1,0 +1,73 @@
+# .github/workflows/build.yml
+name: Build & Push
+
+on:
+  push:
+    branches:
+    - main
+  schedule:
+  - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build & Push final
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .docker/Dockerfile.uv
+        target: final
+        push: true
+        platforms: linux/amd64,linux/arm64
+        tags: |
+          karlender/sp-engine:latest
+          karlender/sp-engine:latest-final
+          karlender/sp-engine:1.0.0-final
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build & Push slim
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .docker/Dockerfile.uv
+        target: slim
+        push: true
+        platforms: linux/amd64,linux/arm64
+        tags: |
+          karlender/sp-engine:slim
+          karlender/sp-engine:latest-slim
+          karlender/sp-engine:1.0.0-slim
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build & Push dev
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .docker/Dockerfile.uv
+        target: dev
+        push: true
+        platforms: linux/amd64,linux/arm64
+        tags: |
+          karlender/sp-engine:dev
+          karlender/sp-engine:latest-dev
+          karlender/sp-engine:1.0.0-dev
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
