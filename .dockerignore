@@ -1,4 +1,5 @@
 REAMDE.md
-.env
+.env*
+.vault*
 .gitignore
 .github
