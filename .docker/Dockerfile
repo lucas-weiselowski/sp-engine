@@ -113,7 +113,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libxml2 \
     libxslt1.1 \
     curl \
-    git
+    git \
+    iputils-ping \
+    iproute2 \
+    traceroute
 
 COPY --from=builder-full /install /usr/local
 
@@ -137,7 +140,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
     vim \
     iputils-ping \
-    iproute2
+    iproute2 \
+    traceroute
 
 COPY requirements/ requirements/
 
