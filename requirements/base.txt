@@ -50,6 +50,7 @@ netutils>=1.9
 # ── Ansible Core  ─────────────────────────────────────────
 ansible-core>=2.17
 ansible-runner>=2.4
+ansible-pylibssh>=1.4.0
 jmespath>=1.0
 resolvelib>=1.0
 
