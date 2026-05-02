@@ -70,7 +70,8 @@ LABEL org.opencontainers.image.source="https://github.com/lucas-weiselowski/sp-e
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    ANSIBLE_HOST_KEY_CHECKING=False
+    ANSIBLE_HOST_KEY_CHECKING=False \
+    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -81,6 +82,7 @@ COPY --from=builder-slim /install /usr/local
 
 COPY collections.yml /collections.yml
 RUN ansible-galaxy collection install -r /collections.yml \
+    -p /usr/share/ansible/collections \
     && rm /collections.yml
 
 WORKDIR /workspace
@@ -99,7 +101,8 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    ANSIBLE_HOST_KEY_CHECKING=False
+    ANSIBLE_HOST_KEY_CHECKING=False \
+    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -113,6 +116,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     git
 
 COPY --from=builder-full /install /usr/local
+
+COPY collections.yml /collections.yml
+RUN ansible-galaxy collection install -r /collections.yml \
+    -p /usr/share/ansible/collections \
+    && rm /collections.yml
 
 WORKDIR /workspace
 CMD ["bash"]
