@@ -65,6 +65,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 FROM debian:bookworm-slim AS builder-tofu
 
 ARG TOFU_VERSION=1.9.0
+ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
@@ -73,13 +74,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL \
-    "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip" \
+    "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_${TARGETARCH}.zip" \
     -o /tmp/tofu.zip \
     && unzip /tmp/tofu.zip -d /tmp/tofu \
     && install -m 0755 /tmp/tofu/tofu /usr/local/bin/tofu \
     && rm -rf /tmp/tofu*
 
-RUN tofu version
+RUN test -x /usr/local/bin/tofu && echo "tofu binary OK"
 
 
 # ============================================================
@@ -87,25 +88,24 @@ RUN tofu version
 # ============================================================
 FROM debian:bookworm-slim AS builder-ollama
 
-ARG OLLAMA_VERSION=latest
+ARG OLLAMA_VERSION=0.6.5
+ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
+    tar \
     && rm -rf /var/lib/apt/lists/*
 
-RUN if [ "${OLLAMA_VERSION}" = "latest" ]; then \
-        curl -fsSL \
-        "https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64" \
-        -o /usr/local/bin/ollama; \
-    else \
-        curl -fsSL \
-        "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64" \
-        -o /usr/local/bin/ollama; \
-    fi \
-    && chmod +x /usr/local/bin/ollama
+RUN mkdir -p /tmp/ollama-extract \
+    && curl -fsSL \
+    "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-${TARGETARCH}.tgz" \
+    -o /tmp/ollama.tgz \
+    && tar -xzf /tmp/ollama.tgz -C /tmp/ollama-extract \
+    && install -m 0755 /tmp/ollama-extract/bin/ollama /usr/local/bin/ollama \
+    && rm -rf /tmp/ollama*
 
-RUN ollama --version
+RUN test -x /usr/local/bin/ollama && echo "ollama binary OK"
 
 
 # ============================================================
