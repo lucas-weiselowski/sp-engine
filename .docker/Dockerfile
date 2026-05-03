@@ -46,21 +46,70 @@ WORKDIR /build
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefix=/install \
-        ansible-core>=2.17 \
-        paramiko>=3.4 \
-        netaddr>=1.3 \
-        netutils>=1.9 \
-        jmespath>=1.0 \
-        passlib>=1.7 \
-        bcrypt>=4.1 \
-        cryptography>=42.0 \
-        PyYAML>=6.0 \
-        Jinja2>=3.1 \
-        resolvelib>=1.0
+        "ansible-core>=2.17" \
+        "paramiko>=3.4" \
+        "netaddr>=1.3" \
+        "netutils>=1.9" \
+        "jmespath>=1.0" \
+        "passlib>=1.7" \
+        "bcrypt>=4.1" \
+        "cryptography>=42.0" \
+        "PyYAML>=6.0" \
+        "Jinja2>=3.1" \
+        "resolvelib>=1.0"
 
 
 # ============================================================
-# Stage 3 – Slim
+# Stage 3 – Builder Tofu
+# ============================================================
+FROM debian:bookworm-slim AS builder-tofu
+
+ARG TOFU_VERSION=1.9.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL \
+    "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip" \
+    -o /tmp/tofu.zip \
+    && unzip /tmp/tofu.zip -d /tmp/tofu \
+    && install -m 0755 /tmp/tofu/tofu /usr/local/bin/tofu \
+    && rm -rf /tmp/tofu*
+
+RUN tofu version
+
+
+# ============================================================
+# Stage 4 – Builder Ollama
+# ============================================================
+FROM debian:bookworm-slim AS builder-ollama
+
+ARG OLLAMA_VERSION=latest
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN if [ "${OLLAMA_VERSION}" = "latest" ]; then \
+        curl -fsSL \
+        "https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64" \
+        -o /usr/local/bin/ollama; \
+    else \
+        curl -fsSL \
+        "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64" \
+        -o /usr/local/bin/ollama; \
+    fi \
+    && chmod +x /usr/local/bin/ollama
+
+RUN ollama --version
+
+
+# ============================================================
+# Stage 5 – Slim
 # ============================================================
 FROM python:3.12-slim AS slim
 
@@ -79,6 +128,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     sshpass
 
 COPY --from=builder-slim /install /usr/local
+COPY --from=builder-tofu /usr/local/bin/tofu /usr/local/bin/tofu
 
 COPY collections.yml /collections.yml
 RUN ansible-galaxy collection install -r /collections.yml \
@@ -90,7 +140,7 @@ CMD ["bash"]
 
 
 # ============================================================
-# Stage 4 – Final
+# Stage 6 – Final
 # ============================================================
 FROM python:3.12-slim AS final
 
@@ -119,6 +169,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     traceroute
 
 COPY --from=builder-full /install /usr/local
+COPY --from=builder-tofu /usr/local/bin/tofu /usr/local/bin/tofu
 
 COPY collections.yml /collections.yml
 RUN ansible-galaxy collection install -r /collections.yml \
@@ -130,11 +181,39 @@ CMD ["bash"]
 
 
 # ============================================================
-# Stage 5 – Dev
+# Stage 7 – AI
+# ============================================================
+FROM final AS ai
+
+LABEL org.opencontainers.image.title="sp-engine-ai"
+
+COPY --from=builder-ollama /usr/local/bin/ollama /usr/local/bin/ollama
+
+ENV OLLAMA_MODELS=/workspace/models \
+    OLLAMA_HOST=0.0.0.0:11434
+
+COPY requirements/ai.txt requirements/ai.txt
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir \
+        -r requirements/ai.txt \
+    && rm -rf requirements/
+
+WORKDIR /workspace
+CMD ["bash"]
+
+
+# ============================================================
+# Stage 8 – Dev
 # ============================================================
 FROM final AS dev
 
 LABEL org.opencontainers.image.title="sp-engine-dev"
+
+COPY --from=builder-ollama /usr/local/bin/ollama /usr/local/bin/ollama
+
+ENV OLLAMA_MODELS=/workspace/models \
+    OLLAMA_HOST=0.0.0.0:11434
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -149,6 +228,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir \
         -r requirements/dev.txt \
         -r requirements/testing.txt \
+        -r requirements/ai.txt \
     && rm -rf requirements/
 
 WORKDIR /workspace
