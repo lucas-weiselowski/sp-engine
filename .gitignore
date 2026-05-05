@@ -1,3 +1,5 @@
 .vaultpass
 .env*
 !.env.example
+uv.lock
+.gitstatus

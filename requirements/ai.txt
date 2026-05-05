@@ -1,11 +1,23 @@
 # ── Ollama ────────────────────────────────────────────────
 ollama>=0.2
 
+# ── OpenAI / Anthropic ────────────────────────────────────
+openai>=1.0
+anthropic>=0.25
+
 # ── LangChain ─────────────────────────────────────────────
 langchain>=0.2
 langchain-core>=0.3.81
 langchain-community>=0.2
 langchain-ollama>=0.1
+langchain-openai>=0.1
+langchain-anthropic>=0.1
+
+# ── RAG / Vector Store ────────────────────────────────────
+chromadb>=0.5
+
+# ── MCP ───────────────────────────────────────────────────
+fastmcp>=0.1
 
 # ── API ───────────────────────────────────────────────────
 fastapi>=0.111

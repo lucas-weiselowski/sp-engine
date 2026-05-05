@@ -1,4 +1,0 @@
-# ── RESTCONF / YANG ───────────────────────────────────────
-pyang>=2.6
-pyangbind>=0.8
-xmltodict>=0.13

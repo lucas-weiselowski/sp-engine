@@ -1,24 +1,14 @@
-# Alles – für lokale Entwicklung
+# ── Dev – alles drin ──────────────────────────────────────
 -r full.txt
+-r validate.txt
 -r testing.txt
 
 # ── pyATS Full ────────────────────────────────────────────
 pyats[full]>=24.5
+
 # ── Ansible Full ──────────────────────────────────────────
 ansible>=10.0
-ansible-lint>=24.6
 
 # ── Shell / REPL ──────────────────────────────────────────
 ipython>=8.24
 ipdb>=0.13
-
-# ── Linting / Formatting ──────────────────────────────────
-black>=24.4
-ruff>=0.4
-mypy>=1.10
-pre-commit>=3.7
-commitizen>=3.27
-
-# ── Typen ─────────────────────────────────────────────────
-types-requests
-types-PyYAML

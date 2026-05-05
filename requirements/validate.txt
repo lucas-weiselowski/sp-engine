@@ -1,0 +1,18 @@
+# ── Linting ───────────────────────────────────────────────
+ruff>=0.4
+flake8>=7.0
+bandit[toml]>=1.7
+ansible-lint>=24.6
+yamllint>=1.35
+
+# ── Formatting ────────────────────────────────────────────
+black>=24.4
+
+# ── Type Checking ─────────────────────────────────────────
+mypy>=1.10
+types-requests
+types-PyYAML
+
+# ── Git Hooks ─────────────────────────────────────────────
+pre-commit>=3.7
+commitizen>=3.27
