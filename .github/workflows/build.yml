@@ -3,95 +3,142 @@ name: Build & Push
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - "v*"
+      - "v*"
   schedule:
-  - cron: '0 3 * * 1'
+    - cron: '0 3 * * 1'
   workflow_dispatch:
-
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Docker Metadata final
-      id: meta-final
-      uses: docker/metadata-action@v5
-      with:
-        images: karlender/sp-engine
-        tags: |
-          type=raw,value=latest
-          type=raw,value=latest-final
-          type=semver,pattern={{ version }}-final
-          type=semver,pattern={{ major }}.{{ minor }}-final
+      # ── Metadata ────────────────────────────────────────────
+      - name: Metadata – final
+        id: meta-final
+        uses: docker/metadata-action@v5
+        with:
+          images: karlender/sp-engine
+          tags: |
+            type=raw,value=latest
+            type=raw,value=latest-final
+            type=semver,pattern={{ version }}-final
+            type=semver,pattern={{ major }}.{{ minor }}-final
 
-    - name: Docker Metadata slim
-      id: meta-slim
-      uses: docker/metadata-action@v5
-      with:
-        images: karlender/sp-engine
-        tags: |
-          type=raw,value=latest-slim
-          type=raw,value=slim
-          type=semver,pattern={{ version }}-slim
-          type=semver,pattern={{ major }}.{{ minor }}-slim
+      - name: Metadata – slim
+        id: meta-slim
+        uses: docker/metadata-action@v5
+        with:
+          images: karlender/sp-engine
+          tags: |
+            type=raw,value=slim
+            type=raw,value=latest-slim
+            type=semver,pattern={{ version }}-slim
+            type=semver,pattern={{ major }}.{{ minor }}-slim
 
-    - name: Docker Metadata dev
-      id: meta-dev
-      uses: docker/metadata-action@v5
-      with:
-        images: karlender/sp-engine
-        tags: |
-          type=raw,value=latest-dev
-          type=raw,value=dev
-          type=semver,pattern={{ version }}-dev
-          type=semver,pattern={{ major }}.{{ minor }}-dev
+      - name: Metadata – validate
+        id: meta-validate
+        uses: docker/metadata-action@v5
+        with:
+          images: karlender/sp-engine
+          tags: |
+            type=raw,value=validate
+            type=raw,value=latest-validate
+            type=semver,pattern={{ version }}-validate
+            type=semver,pattern={{ major }}.{{ minor }}-validate
 
-    - name: Build & Push final
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: .docker/Dockerfile.uv
-        target: final
-        push: true
-        platforms: linux/amd64,linux/arm64
-        tags: ${{ steps.meta-final.outputs.tags }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Metadata – ai
+        id: meta-ai
+        uses: docker/metadata-action@v5
+        with:
+          images: karlender/sp-engine
+          tags: |
+            type=raw,value=ai
+            type=raw,value=latest-ai
+            type=semver,pattern={{ version }}-ai
+            type=semver,pattern={{ major }}.{{ minor }}-ai
 
-    - name: Build & Push slim
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: .docker/Dockerfile.uv
-        target: slim
-        push: true
-        platforms: linux/amd64,linux/arm64
-        tags: ${{ steps.meta-slim.outputs.tags }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Metadata – dev
+        id: meta-dev
+        uses: docker/metadata-action@v5
+        with:
+          images: karlender/sp-engine
+          tags: |
+            type=raw,value=dev
+            type=raw,value=latest-dev
+            type=semver,pattern={{ version }}-dev
+            type=semver,pattern={{ major }}.{{ minor }}-dev
 
-    - name: Build & Push dev
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: .docker/Dockerfile.uv
-        target: dev
-        push: true
-        platforms: linux/amd64,linux/arm64
-        tags: ${{ steps.meta-dev.outputs.tags }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      # ── Build & Push ─────────────────────────────────────────
+      - name: Build & Push – final
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile.uv
+          target: final
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta-final.outputs.tags }}
+          cache-from: type=gha,scope=final
+          cache-to: type=gha,mode=max,scope=final
+
+      - name: Build & Push – slim
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile.uv
+          target: slim
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta-slim.outputs.tags }}
+          cache-from: type=gha,scope=slim
+          cache-to: type=gha,mode=max,scope=slim
+
+      - name: Build & Push – validate
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile.uv
+          target: validate
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta-validate.outputs.tags }}
+          cache-from: type=gha,scope=validate
+          cache-to: type=gha,mode=max,scope=validate
+
+      - name: Build & Push – ai
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile.uv
+          target: ai
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta-ai.outputs.tags }}
+          cache-from: type=gha,scope=ai
+          cache-to: type=gha,mode=max,scope=ai
+
+      - name: Build & Push – dev
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile.uv
+          target: dev
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta-dev.outputs.tags }}
+          cache-from: type=gha,scope=dev
+          cache-to: type=gha,mode=max,scope=dev

@@ -6,7 +6,7 @@ FROM python:3.12-slim AS builder-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     build-essential \
     libssl-dev \
     libffi-dev
@@ -34,7 +34,7 @@ FROM python:3.12-slim AS builder-full
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     build-essential \
     libssl-dev \
     libffi-dev \
@@ -78,7 +78,7 @@ FROM python:3.12-slim AS builder-ai
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     build-essential
 
 WORKDIR /build
@@ -95,10 +95,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ============================================================
 FROM debian:bookworm-slim AS builder-tofu
 
-ARG TOFU_VERSION=1.9.0
+ARG TOFU_VERSION=1.11.6
 ARG TARGETARCH
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     unzip \
@@ -119,10 +119,10 @@ RUN test -x /usr/local/bin/tofu && echo "tofu OK"
 # ============================================================
 FROM debian:bookworm-slim AS builder-ollama
 
-ARG OLLAMA_VERSION=0.6.5
+ARG OLLAMA_VERSION=0.23.0
 ARG TARGETARCH
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     tar \
@@ -154,7 +154,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     openssh-client \
     sshpass \
     libssl3 \
@@ -188,7 +188,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     openssh-client \
     sshpass \
     libssl3 \
@@ -258,7 +258,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     OLLAMA_HOST=0.0.0.0:11434
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     openssh-client \
     sshpass \
     libssl3 \
