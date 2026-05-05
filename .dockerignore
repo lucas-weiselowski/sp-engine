@@ -1,5 +1,6 @@
-REAMDE.md
+README.md
 .env*
 .vault*
 .gitignore
 .github
+.venv

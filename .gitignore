@@ -3,3 +3,4 @@
 !.env.example
 uv.lock
 .gitstatus
+.venv

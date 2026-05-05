@@ -87,7 +87,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: .docker/Dockerfile.uv
+          file: .docker/Dockerfile
           target: final
           push: true
           platforms: linux/amd64,linux/arm64
@@ -99,7 +99,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: .docker/Dockerfile.uv
+          file: .docker/Dockerfile
           target: slim
           push: true
           platforms: linux/amd64,linux/arm64
@@ -111,7 +111,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: .docker/Dockerfile.uv
+          file: .docker/Dockerfile
           target: validate
           push: true
           platforms: linux/amd64,linux/arm64
@@ -123,7 +123,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: .docker/Dockerfile.uv
+          file: .docker/Dockerfile
           target: ai
           push: true
           platforms: linux/amd64,linux/arm64
@@ -135,7 +135,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: .docker/Dockerfile.uv
+          file: .docker/Dockerfile
           target: dev
           push: true
           platforms: linux/amd64,linux/arm64

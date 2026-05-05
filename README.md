@@ -7,13 +7,13 @@
 A batteries-included Python environment for Service Provider network automation.
 Built for engineers working with IOS-XR, JunOS, NX-OS and everything in between.
 
-Comes in three flavours depending on what you need:
-
-| Tag | What's inside | Size |
+| Tag | What's inside | Use case |
 |---|---|---|
-| `latest` / `final` | Python + Ansible + NETCONF + gNMI + AI | ~276MB |
-| `slim` | ansible-core + SP collections only | ~88MB |
-| `dev` | Everything + pyATS + linting + testing tools | ~600MB |
+| `latest` / `final` | Ansible + NETCONF + gNMI + RESTCONF/YANG + Parsing | Production automation |
+| `slim` | ansible-core + SSH + Collections | Quick runs, CI/CD |
+| `validate` | final + ruff, flake8, bandit, ansible-lint, yamllint | Pipeline linting & security scanning |
+| `ai` | final + Ollama + LangChain + OpenAI + FastMCP + ChromaDB | LLM agent workflows |
+| `dev` | Everything + pyATS full + ipython + testing tools | Local development |
 
 ---
 
@@ -35,16 +35,13 @@ docker run -it --rm \
 
 ## Set an alias
 
-Drop this in your `.bashrc` or `.zshrc` and forget Docker is even involved:
+Drop this in your `.bashrc` or `.zshrc`:
 
 ```bash
-# Full image
 alias sp='docker run -it --rm -v $(pwd):/workspace karlender/sp-engine:latest'
-
-# Slim – for quick Ansible runs
 alias sp-slim='docker run -it --rm -v $(pwd):/workspace karlender/sp-engine:slim'
-
-# Dev – with all the tools
+alias sp-validate='docker run -it --rm -v $(pwd):/workspace karlender/sp-engine:validate'
+alias sp-ai='docker run -it --rm -v $(pwd):/workspace karlender/sp-engine:ai'
 alias sp-dev='docker run -it --rm -v $(pwd):/workspace karlender/sp-engine:dev'
 ```
 
@@ -54,6 +51,8 @@ Then just:
 sp ansible-playbook playbooks/deploy_bgp.yml
 sp python3 scripts/check_peers.py
 sp-slim ansible all -m ping
+sp-validate ruff check .
+sp-validate bandit -r .
 ```
 
 ## GitLab CI
@@ -61,6 +60,13 @@ sp-slim ansible all -m ping
 ```yaml
 default:
   image: karlender/sp-engine:latest
+
+lint:
+  image: karlender/sp-engine:validate
+  script:
+    - ruff check .
+    - bandit -r .
+    - ansible-lint playbooks/
 
 deploy:bgp:
   script:
@@ -71,6 +77,16 @@ deploy:bgp:
 
 ```yaml
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    container:
+      image: karlender/sp-engine:validate
+    steps:
+      - uses: actions/checkout@v4
+      - run: ruff check .
+      - run: bandit -r .
+      - run: ansible-lint playbooks/
+
   deploy:
     runs-on: ubuntu-latest
     container:
@@ -82,34 +98,48 @@ jobs:
 
 ## What's included
 
-**Connectivity**
-- netmiko, napalm, paramiko, ncclient, scrapli
-- pygnmi, grpcio – for gNMI/gRPC streaming telemetry
-- RESTCONF via httpx + YANG tooling (pyang, pyangbind)
+**Connectivity** (all images)
+- netmiko, napalm, paramiko, ncclient, scrapli, scrapli-netconf
+- pygnmi, grpcio – gNMI/gRPC streaming telemetry
+- pyang, pyangbind – RESTCONF/YANG tooling
+- httpx, lxml, xmltodict – RESTCONF & XML parsing
 
-**Ansible**
+**Ansible** (all images)
 - ansible-core with cisco.ios, cisco.iosxr, cisco.nxos
 - junipernetworks.junos, ansible.netcommon, ansible.utils
 - community.network, netbox.netbox
 
-**AI / Parsing** (final + dev only)
-- Ollama client + LangChain for local LLM workflows
-- FastAPI for building automation APIs
-- ChromaDB for RAG-based config analysis
+**Parsing** (final, validate, ai, dev)
+- ttp, textfsm, ntc-templates – template-based parsing
+- genie, pyats – Cisco model-driven parsing
+
+**Validate** (validate, dev)
+- ruff, flake8, bandit, ansible-lint, yamllint
+- mypy, black, pre-commit, commitizen
+
+**AI** (ai, dev)
+- Ollama + LangChain + langchain-openai + langchain-anthropic
+- OpenAI + Anthropic SDK
+- FastMCP – MCP server/client
+- ChromaDB – RAG vector store
+- FastAPI + uvicorn – automation APIs
 
 **Dev** (dev only)
-- pyATS full, ansible-lint, pytest, black, ruff, mypy
-- ipython, pre-commit, commitizen
+- pyATS full, pytest, ipython, ipdb
+- All validate tools included
+
+**Infrastructure** (all images)
+- OpenTofu – Infrastructure as Code
+- Nornir + nornir-netmiko + nornir-napalm
 
 ---
 
 ## Transparency
 
-This image was built with the assistance of Claude (Anthropic) for Dockerfile structure and documentation. All configurations have been reviewed and
-tested manually.
+This image was built with the assistance of Claude (Anthropic) for Dockerfile structure and documentation. All configurations have been reviewed and tested manually.
 
 ---
 
-Built with ❤️ for SP engineers tired of setting up Python environments. \
-Source: [github.com/lucas-weiselowski/sp-engine](https://github.com/lucas-weiselowski/sp-engine)
+Built with ❤️ for SP engineers tired of setting up Python environments.  
+Source: [github.com/lucas-weiselowski/sp-engine](https://github.com/lucas-weiselowski/sp-engine)  
 Docker Hub: [karlender/sp-engine](https://hub.docker.com/r/karlender/sp-engine)

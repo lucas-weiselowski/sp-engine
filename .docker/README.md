@@ -1,6 +1,6 @@
 # .docker
 
-This directory contains the Dockerfiles for sp-engine.
+This directory contains the Dockerfile for sp-engine.
 
 ---
 
@@ -8,15 +8,13 @@ This directory contains the Dockerfiles for sp-engine.
 
 | File | Description |
 |---|---|
-| `Dockerfile` | Standard build using pip |
-| `Dockerfile.uv` | Faster build using uv – recommended |
+| `Dockerfile` | Multi-stage build using uv – recommended |
 
 ---
 
-## pip vs uv
+## Why uv?
 
 [uv](https://github.com/astral-sh/uv) is a drop-in replacement for pip written in Rust.
-Same commands, same requirements files – just dramatically faster.
 
 | | pip | uv |
 |---|---|---|
@@ -27,64 +25,54 @@ Same commands, same requirements files – just dramatically faster.
 
 ---
 
+## Build Targets
+
+| Target | Description |
+|---|---|
+| `slim` | ansible-core + SSH + Collections |
+| `final` | slim + NETCONF + gNMI + RESTCONF/YANG + Parsing |
+| `validate` | final + linting + security scanning |
+| `ai` | final + Ollama + LangChain + FastMCP + ChromaDB |
+| `dev` | everything + pyATS full + testing tools |
+
+---
+
 ## Build
 
 ```bash
-# Standard
+# Single target
 docker build --target final -t karlender/sp-engine:latest -f .docker/Dockerfile .
-
-# With uv – recommended
-docker build --target final -t karlender/sp-engine:latest -f .docker/Dockerfile.uv .
+docker build --target slim -t karlender/sp-engine:slim -f .docker/Dockerfile .
+docker build --target validate -t karlender/sp-engine:validate -f .docker/Dockerfile .
+docker build --target ai -t karlender/sp-engine:ai -f .docker/Dockerfile .
+docker build --target dev -t karlender/sp-engine:dev -f .docker/Dockerfile .
 ```
 
 ---
 
 ## Multi-Platform with buildx
 
-By default Docker builds for your local architecture only (`amd64` or `arm64`).
-To build for multiple platforms at once – for example when building on Apple Silicon
-but running on a Linux server – use `buildx`.
-
 ### Setup (once)
 
 ```bash
-# Create a new builder with multi-platform support
 docker buildx create --name sp-builder --use
-
-# Verify
 docker buildx inspect --bootstrap
 ```
 
-### Build & Push multi-platform
+### Build & Push
 
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --target final \
   -t karlender/sp-engine:latest \
-  -t karlender/sp-engine:1.0.0-final \
-  -f .docker/Dockerfile.uv \
+  -t karlender/sp-engine:1.0.1-final \
+  -f .docker/Dockerfile \
   --push \
   .
 ```
 
 > `--push` is required for multi-platform builds – `--load` only supports single platform.
-
-### Build targets
-
-```bash
-# Slim – ansible-core + SP collections only
-docker buildx build --platform linux/amd64,linux/arm64 --target slim \
-  -t karlender/sp-engine:slim -f .docker/Dockerfile.uv --push .
-
-# Final – full image
-docker buildx build --platform linux/amd64,linux/arm64 --target final \
-  -t karlender/sp-engine:latest -f .docker/Dockerfile.uv --push .
-
-# Dev – everything included
-docker buildx build --platform linux/amd64,linux/arm64 --target dev \
-  -t karlender/sp-engine:dev -f .docker/Dockerfile.uv --push .
-```
 
 ---
 
@@ -98,5 +86,4 @@ docker buildx build --platform linux/amd64,linux/arm64 --target dev \
 
 ## Transparency
 
-This image was built with the assistance of Claude (Anthropic) for Dockerfile structure and documentation. All configurations have been reviewed and
-tested manually.
+This image was built with the assistance of Claude (Anthropic) for Dockerfile structure and documentation. All configurations have been reviewed and tested manually.
