@@ -115,32 +115,6 @@ RUN test -x /usr/local/bin/tofu && echo "tofu OK"
 
 
 # ============================================================
-# STAGE 6 – Builder Ollama
-# ============================================================
-FROM debian:bookworm-slim AS builder-ollama
-
-ARG OLLAMA_VERSION=0.23.0
-ARG TARGETARCH
-
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    zstd \
-    tar \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN curl -fsSL \
-    "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-${TARGETARCH}.tar.zst" \
-    -o /tmp/ollama.tar.zst \
-    && mkdir -p /tmp/ollama-extract \
-    && tar -xf /tmp/ollama.tar.zst -C /tmp/ollama-extract \
-    && install -m 0755 /tmp/ollama-extract/bin/ollama /usr/local/bin/ollama \
-    && rm -rf /tmp/ollama*
-
-RUN test -x /usr/local/bin/ollama && echo "ollama OK"
-
-
-# ============================================================
 # STAGE 7 – Slim
 # ============================================================
 FROM python:3.12-slim AS slim
@@ -234,11 +208,7 @@ FROM final AS ai
 
 LABEL org.opencontainers.image.title="sp-engine-ai"
 
-ENV OLLAMA_MODELS=/workspace/models \
-    OLLAMA_HOST=0.0.0.0:11434
-
 COPY --from=builder-ai /install /usr/local
-COPY --from=builder-ollama /usr/local/bin/ollama /usr/local/bin/ollama
 
 WORKDIR /workspace
 CMD ["bash"]
@@ -254,9 +224,7 @@ LABEL org.opencontainers.image.title="sp-engine-dev"
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     ANSIBLE_HOST_KEY_CHECKING=False \
-    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections \
-    OLLAMA_MODELS=/workspace/models \
-    OLLAMA_HOST=0.0.0.0:11434
+    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
@@ -277,7 +245,6 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY --from=builder-full /install /usr/local
 COPY --from=builder-validate /install /usr/local
 COPY --from=builder-ai /install /usr/local
-COPY --from=builder-ollama /usr/local/bin/ollama /usr/local/bin/ollama
 COPY --from=builder-tofu /usr/local/bin/tofu /usr/local/bin/tofu
 
 COPY collections.yml /collections.yml
