@@ -1,7 +1,7 @@
 # ============================================================
 # STAGE 1 – Builder Slim
 # ============================================================
-FROM python:3.12-slim AS builder-slim
+FROM python:3.13-slim AS builder-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ============================================================
 # STAGE 2 – Builder Full (no AI)
 # ============================================================
-FROM python:3.12-slim AS builder-full
+FROM python:3.13-slim AS builder-full
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
@@ -57,7 +57,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ============================================================
 # STAGE 3 – Builder Validate
 # ============================================================
-FROM python:3.12-slim AS builder-validate
+FROM python:3.13-slim AS builder-validate
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
@@ -73,7 +73,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ============================================================
 # STAGE 4 – Builder AI
 # ============================================================
-FROM python:3.12-slim AS builder-ai
+FROM python:3.13-slim AS builder-ai
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
@@ -117,7 +117,7 @@ RUN test -x /usr/local/bin/tofu && echo "tofu OK"
 # ============================================================
 # STAGE 7 – Slim
 # ============================================================
-FROM python:3.12-slim AS slim
+FROM python:3.13-slim AS slim
 
 LABEL maintainer="lucas-weiselowski"
 LABEL org.opencontainers.image.title="sp-engine-slim"
@@ -150,7 +150,7 @@ CMD ["bash"]
 # ============================================================
 # STAGE 8 – Final (Prod)
 # ============================================================
-FROM python:3.12-slim AS final
+FROM python:3.13-slim AS final
 
 LABEL maintainer="lucas-weiselowski"
 LABEL org.opencontainers.image.title="sp-engine"
@@ -217,7 +217,7 @@ CMD ["bash"]
 # ============================================================
 # STAGE 11 – Dev (Everything)
 # ============================================================
-FROM python:3.12-slim AS dev
+FROM python:3.13-slim AS dev
 
 LABEL org.opencontainers.image.title="sp-engine-dev"
 
