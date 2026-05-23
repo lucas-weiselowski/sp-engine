@@ -6,24 +6,24 @@ FROM python:3.13-slim AS builder-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    build-essential \
-    libssl-dev \
-    libffi-dev
+  apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+  build-essential \
+  libssl-dev \
+  libffi-dev
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --prefix=/install --system \
-        "ansible-core>=2.17" \
-        "paramiko>=3.4" \
-        "netaddr>=1.3" \
-        "netutils>=1.9" \
-        "jmespath>=1.0" \
-        "passlib>=1.7" \
-        "bcrypt>=4.1" \
-        "cryptography>=42.0" \
-        "PyYAML>=6.0" \
-        "Jinja2>=3.1" \
-        "resolvelib>=1.0"
+  uv pip install --prefix=/install --system \
+  "ansible-core>=2.17" \
+  "paramiko>=3.4" \
+  "netaddr>=1.3" \
+  "netutils>=1.9" \
+  "jmespath>=1.0" \
+  "passlib>=1.7" \
+  "bcrypt>=4.1" \
+  "cryptography>=42.0" \
+  "PyYAML>=6.0" \
+  "Jinja2>=3.1" \
+  "resolvelib>=1.0"
 
 
 # ============================================================
@@ -34,13 +34,13 @@ FROM python:3.13-slim AS builder-full
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    git
+  apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+  build-essential \
+  libssl-dev \
+  libffi-dev \
+  libxml2-dev \
+  libxslt1-dev \
+  git
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
@@ -49,9 +49,9 @@ WORKDIR /build
 COPY requirements/ requirements/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --prefix=/install --system \
-        -r requirements/base.txt \
-        -r requirements/netconf.txt
+  uv pip install --prefix=/install --system \
+  -r requirements/base.txt \
+  -r requirements/netconf.txt
 
 
 # ============================================================
@@ -66,8 +66,8 @@ WORKDIR /build
 COPY requirements/validate.txt requirements/validate.txt
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --prefix=/install --system \
-        -r requirements/validate.txt
+  uv pip install --prefix=/install --system \
+  -r requirements/validate.txt
 
 
 # ============================================================
@@ -78,16 +78,16 @@ FROM python:3.13-slim AS builder-ai
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    build-essential
+  apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+  build-essential
 
 WORKDIR /build
 
 COPY requirements/ai.txt requirements/ai.txt
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --prefix=/install --system \
-        -r requirements/ai.txt
+  uv pip install --prefix=/install --system \
+  -r requirements/ai.txt
 
 
 # ============================================================
@@ -99,17 +99,17 @@ ARG TOFU_VERSION=1.11.6
 ARG TARGETARCH
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+  curl \
+  ca-certificates \
+  unzip \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL \
-    "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_${TARGETARCH}.zip" \
-    -o /tmp/tofu.zip \
-    && unzip /tmp/tofu.zip -d /tmp/tofu \
-    && install -m 0755 /tmp/tofu/tofu /usr/local/bin/tofu \
-    && rm -rf /tmp/tofu*
+  "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_${TARGETARCH}.zip" \
+  -o /tmp/tofu.zip \
+  && unzip /tmp/tofu.zip -d /tmp/tofu \
+  && install -m 0755 /tmp/tofu/tofu /usr/local/bin/tofu \
+  && rm -rf /tmp/tofu*
 
 RUN test -x /usr/local/bin/tofu && echo "tofu OK"
 
@@ -124,24 +124,24 @@ LABEL org.opencontainers.image.title="sp-engine-slim"
 LABEL org.opencontainers.image.source="https://github.com/lucas-weiselowski/sp-engine"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    ANSIBLE_HOST_KEY_CHECKING=False \
-    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
+  PYTHONUNBUFFERED=1 \
+  ANSIBLE_HOST_KEY_CHECKING=False \
+  ANSIBLE_COLLECTIONS_PATH=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    openssh-client \
-    sshpass \
-    libssl3 \
-    libffi8
+  apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+  openssh-client \
+  sshpass \
+  libssl3 \
+  libffi8
 
 COPY --from=builder-slim /install /usr/local
 COPY --from=builder-tofu /usr/local/bin/tofu /usr/local/bin/tofu
 
 COPY collections.yml /collections.yml
 RUN ansible-galaxy collection install -r /collections.yml \
-    -p /usr/share/ansible/collections \
-    && rm /collections.yml
+  -p /usr/share/ansible/collections \
+  && rm /collections.yml
 
 WORKDIR /workspace
 CMD ["bash"]
@@ -158,31 +158,31 @@ LABEL org.opencontainers.image.source="https://github.com/lucas-weiselowski/sp-e
 LABEL org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    ANSIBLE_HOST_KEY_CHECKING=False \
-    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
+  PYTHONUNBUFFERED=1 \
+  ANSIBLE_HOST_KEY_CHECKING=False \
+  ANSIBLE_COLLECTIONS_PATH=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    openssh-client \
-    sshpass \
-    libssl3 \
-    libffi8 \
-    libxml2 \
-    libxslt1.1 \
-    curl \
-    git \
-    iputils-ping \
-    iproute2 \
-    traceroute
+  apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+  openssh-client \
+  sshpass \
+  libssl3 \
+  libffi8 \
+  libxml2 \
+  libxslt1.1 \
+  curl \
+  git \
+  iputils-ping \
+  iproute2 \
+  traceroute
 
 COPY --from=builder-full /install /usr/local
 COPY --from=builder-tofu /usr/local/bin/tofu /usr/local/bin/tofu
 
 COPY collections.yml /collections.yml
 RUN ansible-galaxy collection install -r /collections.yml \
-    -p /usr/share/ansible/collections \
-    && rm /collections.yml
+  -p /usr/share/ansible/collections \
+  && rm /collections.yml
 
 WORKDIR /workspace
 CMD ["bash"]
@@ -222,24 +222,24 @@ FROM python:3.13-slim AS dev
 LABEL org.opencontainers.image.title="sp-engine-dev"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    ANSIBLE_HOST_KEY_CHECKING=False \
-    ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
+  PYTHONUNBUFFERED=1 \
+  ANSIBLE_HOST_KEY_CHECKING=False \
+  ANSIBLE_COLLECTIONS_PATH=/usr/share/ansible/collections
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    openssh-client \
-    sshpass \
-    libssl3 \
-    libffi8 \
-    libxml2 \
-    libxslt1.1 \
-    curl \
-    git \
-    vim \
-    iputils-ping \
-    iproute2 \
-    traceroute
+  apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+  openssh-client \
+  sshpass \
+  libssl3 \
+  libffi8 \
+  libxml2 \
+  libxslt1.1 \
+  curl \
+  git \
+  vim \
+  iputils-ping \
+  iproute2 \
+  traceroute
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY --from=builder-full /install /usr/local
@@ -249,15 +249,15 @@ COPY --from=builder-tofu /usr/local/bin/tofu /usr/local/bin/tofu
 
 COPY collections.yml /collections.yml
 RUN ansible-galaxy collection install -r /collections.yml \
-    -p /usr/share/ansible/collections \
-    && rm /collections.yml
+  -p /usr/share/ansible/collections \
+  && rm /collections.yml
 
 COPY requirements/ requirements/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system \
-        -r requirements/dev.txt \
-    && rm -rf requirements/
+  uv pip install --system \
+  -r requirements/dev.txt \
+  && rm -rf requirements/
 
 WORKDIR /workspace
 CMD ["bash"]
